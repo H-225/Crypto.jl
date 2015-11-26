@@ -113,13 +113,13 @@ function transform!(state, block)
   A0, B0, C0, D0, E0 = state
   A1, B1, C1, D1, E1 = state
 
-  X = zeros(Uint32, WORDS_PER_BLOCK)
+  X = zeros(UInt32, WORDS_PER_BLOCK)
 
   for i = 1:WORDS_PER_BLOCK
-    X[i] = uint32(block[4 * (i - 1) + 4]) << 24 +
-           uint32(block[4 * (i - 1) + 3]) << 16 +
-           uint32(block[4 * (i - 1) + 2]) << 8 +
-           uint32(block[4 * (i - 1) + 1])
+    X[i] = UInt32(block[4 * (i - 1) + 4]) << 24 +
+           UInt32(block[4 * (i - 1) + 3]) << 16 +
+           UInt32(block[4 * (i - 1) + 2]) << 8 +
+           UInt32(block[4 * (i - 1) + 1])
   end
 
   for j = 1:80
@@ -128,8 +128,8 @@ function transform!(state, block)
     i = div + (rem == 0 ? 0 : 1)
     k = 5 - i + 1
 
-    T = uint32(A0 + f[i](B0, C0, D0) + X[r0[j]] + K0[i])
-    T = uint32(ROTLEFT(T, s0[j]) + E0)
+    T = UInt32(A0 + f[i](B0, C0, D0) + X[r0[j]] + K0[i])
+    T = UInt32(ROTLEFT(T, s0[j]) + E0)
 
     A0 = E0
     E0 = D0
@@ -137,8 +137,8 @@ function transform!(state, block)
     C0 = B0
     B0 = T
 
-    T = uint32(A1 + f[k](B1, C1, D1) + X[r1[j]] + K1[i])
-    T = uint32(ROTLEFT(T, s1[j]) + E1)
+    T = UInt32(A1 + f[k](B1, C1, D1) + X[r1[j]] + K1[i])
+    T = UInt32(ROTLEFT(T, s1[j]) + E1)
 
     A1 = E1
     E1 = D1
@@ -147,12 +147,12 @@ function transform!(state, block)
     B1 = T
   end
 
-  T = uint32(state[2] + C0 + D1)
-  state[2] = uint32(state[3] + D0 + E1)
-  state[3] = uint32(state[4] + E0 + A1)
-  state[4] = uint32(state[5] + A0 + B1)
-  state[5] = uint32(state[1] + B0 + C1)
-  state[1] = uint32(T)
+  T = UInt32(state[2] + C0 + D1)
+  state[2] = UInt32(state[3] + D0 + E1)
+  state[3] = UInt32(state[4] + E0 + A1)
+  state[4] = UInt32(state[5] + A0 + B1)
+  state[5] = UInt32(state[1] + B0 + C1)
+  state[1] = UInt32(T)
 
   return
 end
@@ -163,7 +163,7 @@ function ripemd160(msg::ASCIIString; is_hex=false)
     len = int(length(msg) / 2)
     result = zeros(Uint8, len)
     for i = 1:len
-      result[i] = uint8(parseint(msg[2 * i - 1: 2 * i],16))
+      result[i] = UInt8(parse(Int, msg[2 * i - 1: 2 * i]))
     end
     msg = result
   else
@@ -196,11 +196,11 @@ function ripemd160(msg::ASCIIString; is_hex=false)
     # Append k bits '0', where k is the minimum number >= 0 such that the 
     # resulting message length (modulo 512 in bits) is 448.
     if length(msg) > BLOCK_SIZE - 8
-      msg = append!(msg, zeros(Uint8, BLOCK_SIZE - rem))
+      msg = append!(msg, zeros(UInt8, BLOCK_SIZE - rem))
       transform!(state, msg)
       msg = zeros(Uint8, BLOCK_SIZE)
     else
-      msg = append!(msg, zeros(Uint8, BLOCK_SIZE - rem))
+      msg = append!(msg, zeros(UInt8, BLOCK_SIZE - rem))
     end
 
     # Append length of message (without the '1' bit or padding), in bits, as 
