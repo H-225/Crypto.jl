@@ -130,10 +130,10 @@ function transform!(state, block)
   m = zeros(Uint32, CHUNKS_PER_SCHEDULE)
 
   for i = 1:CHUNKS_PER_BLOCK
-    m[i] = uint32(block[4 * (i - 1) + 1]) << 24 +
-           uint32(block[4 * (i - 1) + 2]) << 16 +
-           uint32(block[4 * (i - 1) + 3]) << 8 +
-           uint32(block[4 * (i - 1) + 4])
+    m[i] = UInt32(block[4 * (i - 1) + 1]) << 24 +
+           UInt32(block[4 * (i - 1) + 2]) << 16 +
+           UInt32(block[4 * (i - 1) + 3]) << 8 +
+           UInt32(block[4 * (i - 1) + 4])
   end
   for i = CHUNKS_PER_BLOCK + 1:CHUNKS_PER_SCHEDULE
     s0 = S0(m[i-15])
@@ -151,11 +151,11 @@ function transform!(state, block)
     h = g;
     g = f;
     f = e;
-    e = uint32(d + t1)
+    e = UInt32(d + t1)
     d = c;
     c = b;
     b = a;
-    a = uint32(t1 + t2)
+    a = UInt32(t1 + t2)
   end
 
   state[1] += a
@@ -173,7 +173,7 @@ end
 function sha256(msg::String; is_hex=false)
 
   if is_hex
-    msg = [uint8(parseint(msg[2*i-1:2*i], 16)) for i in 1:length(msg)/2]
+    msg = [UInt8(parse(Int, msg[2*i-1:2*i], 16)) for i in 1:length(msg)/2]
   else
     # We only want byte array literal (i.e., character array)
     msg = msg.data
@@ -215,11 +215,11 @@ function sha256(msg::String; is_hex=false)
     # Append k bits '0', where k is the minimum number >= 0 such that the 
     # resulting message length (modulo 512 in bits) is 448.
     if length(msg) > BLOCK_SIZE - 8
-      msg = append!(msg, zeros(Uint8, BLOCK_SIZE - rem))
+      msg = append!(msg, zeros(UInt8, BLOCK_SIZE - rem))
       transform!(state, msg)
-      msg = zeros(Uint8, BLOCK_SIZE)
+      msg = zeros(UInt8, BLOCK_SIZE)
     else
-      msg = append!(msg, zeros(Uint8, BLOCK_SIZE - rem))
+      msg = append!(msg, zeros(UInt8, BLOCK_SIZE - rem))
     end
 
     # Append length of message (without the '1' bit or padding), in bits, as 
